@@ -64,8 +64,6 @@ const placeOrderCashfree = async (req, res) => {
         order_currency: currency,
         customer_details: {
           customer_id: userId.toString(),
-          customer_email: "test@example.com", // replace if available
-          customer_phone: "9999999999" // replace if available
         },
         order_meta: {
           return_url: `${origin}/verify-cashfree?order_id={order_id}`

@@ -1,6 +1,5 @@
 import express from 'express'
 import {
-    placeOrder,
     placeOrderCashfree,
     verifyCashfree,
     allOrders,
@@ -17,7 +16,6 @@ orderRouter.post('/list', adminAuth, allOrders)
 orderRouter.post('/status', adminAuth, updateStatus)
 
 // Payment Features
-orderRouter.post('/place', authUser, placeOrder)
 orderRouter.post('/razorpay', authUser, placeOrderCashfree)
 
 // User Feature 

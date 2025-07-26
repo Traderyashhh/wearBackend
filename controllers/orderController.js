@@ -12,9 +12,13 @@ const CASHFREE_BASE_URL = 'https://sandbox.cashfree.com'; // Use production URL 
 // Placing orders using COD
 const placeOrder = async (req, res) => {
   try {
-    const { token, items, address } = req.body;
+    const { items, address } = req.body;
+    const token = req.headers.token;
+
+
 
     const user = await userModel.findOne({ token });
+
     if (!user) return res.json({ success: false, message: "User not found" });
 
     // Fetch full product info

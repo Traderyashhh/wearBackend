@@ -12,26 +12,44 @@ const CASHFREE_BASE_URL = 'https://sandbox.cashfree.com'; // Use production URL 
 // Placing orders using COD
 const placeOrder = async (req, res) => {
   try {
-    const { userId, items, amount, address } = req.body;
+    const { token, items, address } = req.body;
 
-    const orderData = {
-      userId,
-      items,
+    const user = await userModel.findOne({ token });
+    if (!user) return res.json({ success: false, message: "User not found" });
+
+    // Fetch full product info
+    let productDetails = await Promise.all(
+      Object.keys(items).map(async (itemId) => {
+        const product = await productModel.findById(itemId);
+        return {
+          productId: itemId,
+          name: product.name,
+          image: product.image,
+          price: product.price,
+          quantity: items[itemId],
+        };
+      })
+    );
+
+    const order = new orderModel({
+      userId: user._id,
+      items: productDetails,
+      amount: productDetails.reduce((sum, item) => sum + item.price * item.quantity, 0),
       address,
-      amount,
-      paymentMethod: "COD",
+      status: "Processing",
       payment: false,
-      date: Date.now()
-    };
+      paymentMethod: "COD",
+      date: Date.now(),
+    });
 
-    const newOrder = new orderModel(orderData);
-    await newOrder.save();
+    await order.save();
 
-    await userModel.findByIdAndUpdate(userId, { cartData: {} });
+    // clear cart after order
+    await userModel.findByIdAndUpdate(user._id, { cartData: {} });
 
-    res.json({ success: true, message: "Order Placed" });
+    res.json({ success: true, message: "Order Placed Successfully" });
   } catch (error) {
-    console.log(error);
+    console.log("Error placing COD order:", error);
     res.json({ success: false, message: error.message });
   }
 };
